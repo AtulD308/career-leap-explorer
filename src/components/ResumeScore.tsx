@@ -3,13 +3,40 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 
-const ResumeScore = () => {
-  const overallScore = 78;
-  const subscores = [
+interface ResumeScoreProps {
+  scoreData?: {
+    overallScore: number;
+    subscores: Array<{
+      name: string;
+      score: number;
+      color: string;
+    }>;
+  };
+}
+
+const ResumeScore = ({ scoreData }: ResumeScoreProps) => {
+  // Use provided data or fallback to mock data
+  const overallScore = scoreData?.overallScore || 78;
+  const subscores = scoreData?.subscores || [
     { name: 'ATS Friendly', score: 85, color: 'bg-green-500' },
     { name: 'Keywords Match', score: 72, color: 'bg-yellow-500' },
     { name: 'Section Coverage', score: 76, color: 'bg-blue-500' },
   ];
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return '#3b82f6'; // blue
+    if (score >= 60) return '#eab308'; // yellow
+    return '#ef4444'; // red
+  };
+
+  const getScoreBadge = (score: number) => {
+    if (score >= 80) return { variant: 'default' as const, text: 'Excellent' };
+    if (score >= 60) return { variant: 'secondary' as const, text: 'Good' };
+    return { variant: 'destructive' as const, text: 'Needs Improvement' };
+  };
+
+  const badge = getScoreBadge(overallScore);
+  const strokeColor = getScoreColor(overallScore);
 
   return (
     <Card>
@@ -38,7 +65,7 @@ const ResumeScore = () => {
                     cy="60"
                     r="50"
                     fill="none"
-                    stroke="#3b82f6"
+                    stroke={strokeColor}
                     strokeWidth="8"
                     strokeDasharray={`${overallScore * 3.14} 314`}
                     strokeLinecap="round"
@@ -52,11 +79,8 @@ const ResumeScore = () => {
                   </div>
                 </div>
               </div>
-              <Badge 
-                variant={overallScore >= 80 ? 'default' : overallScore >= 60 ? 'secondary' : 'destructive'}
-                className="mt-4"
-              >
-                {overallScore >= 80 ? 'Excellent' : overallScore >= 60 ? 'Good' : 'Needs Improvement'}
+              <Badge variant={badge.variant} className="mt-4">
+                {badge.text}
               </Badge>
             </div>
           </div>
@@ -74,6 +98,39 @@ const ResumeScore = () => {
             ))}
           </div>
         </div>
+
+        {/* Score Breakdown */}
+        {scoreData && (
+          <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-semibold text-gray-900 mb-3">Score Breakdown</h4>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+              <div className="text-center">
+                <div className="font-medium text-gray-900">Section Complete</div>
+                <div className="text-blue-600 font-bold">{scoreData.breakdown?.sectionCompleteness || 0}/25</div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium text-gray-900">Keywords</div>
+                <div className="text-green-600 font-bold">{scoreData.breakdown?.keywordRelevance || 0}/30</div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium text-gray-900">ATS Friendly</div>
+                <div className="text-purple-600 font-bold">{scoreData.breakdown?.atsCompliance || 0}/20</div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium text-gray-900">Achievements</div>
+                <div className="text-orange-600 font-bold">{scoreData.breakdown?.quantifiedAchievements || 0}/10</div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium text-gray-900">Grammar</div>
+                <div className="text-red-600 font-bold">{scoreData.breakdown?.grammarQuality || 0}/10</div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium text-gray-900">Length</div>
+                <div className="text-indigo-600 font-bold">{scoreData.breakdown?.resumeLength || 0}/5</div>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
