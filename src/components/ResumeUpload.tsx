@@ -1,14 +1,15 @@
 
 import { useState, useCallback } from 'react';
-import { Upload, FileText, X } from 'lucide-react';
+import { Upload, FileText, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ResumeUploadProps {
   onUpload: (file: File) => void;
+  isAnalyzing?: boolean;
 }
 
-const ResumeUpload = ({ onUpload }: ResumeUploadProps) => {
+const ResumeUpload = ({ onUpload, isAnalyzing = false }: ResumeUploadProps) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -87,6 +88,7 @@ const ResumeUpload = ({ onUpload }: ResumeUploadProps) => {
                     variant="ghost"
                     size="sm"
                     onClick={() => setSelectedFile(null)}
+                    disabled={isAnalyzing}
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -110,22 +112,43 @@ const ResumeUpload = ({ onUpload }: ResumeUploadProps) => {
               </div>
             )}
             
-            <input
-              type="file"
-              accept=".pdf,.docx"
-              onChange={handleFileSelect}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
+            {!isAnalyzing && (
+              <input
+                type="file"
+                accept=".pdf,.docx"
+                onChange={handleFileSelect}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                disabled={isAnalyzing}
+              />
+            )}
           </div>
 
           {selectedFile && (
             <div className="mt-6 flex justify-center">
               <Button 
                 onClick={handleAnalyze}
+                disabled={isAnalyzing}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8"
               >
-                Analyze Resume
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Analyzing Resume...
+                  </>
+                ) : (
+                  'Analyze Resume'
+                )}
               </Button>
+            </div>
+          )}
+
+          {isAnalyzing && (
+            <div className="mt-6 text-center">
+              <div className="flex items-center justify-center space-x-2 text-blue-600">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>AI is analyzing your resume...</span>
+              </div>
+              <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
             </div>
           )}
         </CardContent>
