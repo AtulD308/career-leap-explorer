@@ -11,6 +11,14 @@ interface ResumeScoreProps {
       score: number;
       color: string;
     }>;
+    breakdown?: {
+      sectionCompleteness: number;
+      keywordRelevance: number;
+      atsCompliance: number;
+      quantifiedAchievements: number;
+      grammarQuality: number;
+      resumeLength: number;
+    };
   };
 }
 
