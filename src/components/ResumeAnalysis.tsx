@@ -8,10 +8,11 @@ import JobRecommendations from '@/components/JobRecommendations';
 
 interface ResumeAnalysisProps {
   resumeData: any;
+  analysisData: any;
   onNewUpload: () => void;
 }
 
-const ResumeAnalysis = ({ resumeData, onNewUpload }: ResumeAnalysisProps) => {
+const ResumeAnalysis = ({ resumeData, analysisData, onNewUpload }: ResumeAnalysisProps) => {
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -31,7 +32,7 @@ const ResumeAnalysis = ({ resumeData, onNewUpload }: ResumeAnalysisProps) => {
       </div>
 
       {/* Resume Score Overview */}
-      <ResumeScore />
+      <ResumeScore scoreData={analysisData} />
 
       {/* Feedback Summary */}
       <FeedbackSummary />

@@ -3,15 +3,19 @@ import { useState, useCallback } from 'react';
 import { Upload, FileText, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { extractTextFromFile, validateResumeFile, ExtractedResumeData } from '@/utils/fileExtraction';
 
 interface ResumeUploadProps {
-  onUpload: (file: File) => void;
+  onUpload: (resumeData: ExtractedResumeData) => void;
   isAnalyzing?: boolean;
 }
 
 const ResumeUpload = ({ onUpload, isAnalyzing = false }: ResumeUploadProps) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [extracting, setExtracting] = useState(false);
+  const { toast } = useToast();
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -30,8 +34,15 @@ const ResumeUpload = ({ onUpload, isAnalyzing = false }: ResumeUploadProps) => {
     
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      if (file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      const validation = validateResumeFile(file);
+      if (validation.valid) {
         setSelectedFile(file);
+      } else {
+        toast({
+          title: "Invalid file",
+          description: validation.error,
+          variant: "destructive"
+        });
       }
     }
   }, []);
@@ -42,9 +53,26 @@ const ResumeUpload = ({ onUpload, isAnalyzing = false }: ResumeUploadProps) => {
     }
   };
 
-  const handleAnalyze = () => {
-    if (selectedFile) {
-      onUpload(selectedFile);
+  const handleAnalyze = async () => {
+    if (!selectedFile) return;
+
+    setExtracting(true);
+    try {
+      const extractedData = await extractTextFromFile(selectedFile);
+      onUpload(extractedData);
+      
+      toast({
+        title: "Resume processed successfully!",
+        description: `Extracted ${extractedData.text.length} characters from ${extractedData.fileName}`
+      });
+    } catch (error: any) {
+      toast({
+        title: "Processing failed",
+        description: error.message || 'Failed to process resume',
+        variant: "destructive"
+      });
+    } finally {
+      setExtracting(false);
     }
   };
 
@@ -62,7 +90,7 @@ const ResumeUpload = ({ onUpload, isAnalyzing = false }: ResumeUploadProps) => {
             <span>Resume Upload</span>
           </CardTitle>
           <CardDescription>
-            Upload your resume in PDF or DOCX format to get started
+            Upload your resume in PDF, DOCX, or TXT format to get started
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -107,7 +135,7 @@ const ResumeUpload = ({ onUpload, isAnalyzing = false }: ResumeUploadProps) => {
                   <p className="text-sm text-gray-600">or click to browse files</p>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Supported formats: PDF, DOCX (Max size: 10MB)
+                  Supported formats: PDF, DOCX, TXT (Max size: 10MB)
                 </p>
               </div>
             )}
@@ -115,7 +143,7 @@ const ResumeUpload = ({ onUpload, isAnalyzing = false }: ResumeUploadProps) => {
             {!isAnalyzing && (
               <input
                 type="file"
-                accept=".pdf,.docx"
+                accept=".pdf,.docx,.txt"
                 onChange={handleFileSelect}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 disabled={isAnalyzing}
@@ -127,10 +155,15 @@ const ResumeUpload = ({ onUpload, isAnalyzing = false }: ResumeUploadProps) => {
             <div className="mt-6 flex justify-center">
               <Button 
                 onClick={handleAnalyze}
-                disabled={isAnalyzing}
+                disabled={isAnalyzing || extracting}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8"
               >
-                {isAnalyzing ? (
+                {extracting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Extracting Text...
+                  </>
+                ) : isAnalyzing ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Analyzing Resume...

@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import ResumeUpload from '@/components/ResumeUpload';
 import ResumeAnalysis from '@/components/ResumeAnalysis';
+import { ExtractedResumeData } from '@/utils/fileExtraction';
+import { analyzeResume } from '@/utils/resumeScoring';
 
 interface DashboardProps {
   onBack: () => void;
@@ -12,44 +14,31 @@ interface DashboardProps {
 
 const Dashboard = ({ onBack }: DashboardProps) => {
   const [resumeUploaded, setResumeUploaded] = useState(false);
-  const [resumeData, setResumeData] = useState<any>(null);
+  const [resumeData, setResumeData] = useState<ExtractedResumeData | null>(null);
+  const [analysisData, setAnalysisData] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { toast } = useToast();
 
-  const handleResumeUpload = async (file: File) => {
+  const handleResumeUpload = async (extractedData: ExtractedResumeData) => {
     setIsAnalyzing(true);
+    setResumeData(extractedData);
     
     try {
+      // Analyze the extracted text
+      console.log('Analyzing resume text:', extractedData.text.substring(0, 100) + '...');
+      
       // Simulate AI processing time
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // In a real app, you would process the file here and extract text
-      console.log('Processing resume file:', file.name);
+      // Analyze the resume using our scoring system
+      const analysis = analyzeResume(extractedData.text);
       
-      // Mock processed resume data
-      const processedData = {
-        fileName: file.name,
-        fileSize: file.size,
-        uploadDate: new Date().toISOString(),
-        extractedText: "Sample extracted text from resume...",
-        analysis: {
-          overallScore: 78,
-          sections: {
-            summary: "Present",
-            experience: "Strong",
-            skills: "Needs improvement",
-            education: "Present",
-            projects: "Missing"
-          }
-        }
-      };
-      
-      setResumeData(processedData);
+      setAnalysisData(analysis);
       setResumeUploaded(true);
       
       toast({
         title: "Resume analyzed successfully!",
-        description: "Your resume has been processed and analyzed.",
+        description: `Score: ${analysis.overallScore}/100 - ${analysis.feedback.length} recommendations generated`,
       });
       
     } catch (error) {
@@ -67,6 +56,7 @@ const Dashboard = ({ onBack }: DashboardProps) => {
   const handleNewUpload = () => {
     setResumeUploaded(false);
     setResumeData(null);
+    setAnalysisData(null);
     setIsAnalyzing(false);
   };
 
@@ -105,7 +95,7 @@ const Dashboard = ({ onBack }: DashboardProps) => {
         {!resumeUploaded ? (
           <ResumeUpload onUpload={handleResumeUpload} isAnalyzing={isAnalyzing} />
         ) : (
-          <ResumeAnalysis resumeData={resumeData} onNewUpload={handleNewUpload} />
+          <ResumeAnalysis resumeData={resumeData} analysisData={analysisData} onNewUpload={handleNewUpload} />
         )}
       </main>
     </div>
