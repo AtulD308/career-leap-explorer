@@ -150,7 +150,7 @@ const ResumeUpload = ({ onUpload, isAnalyzing = false }: ResumeUploadProps) => {
               </div>
             )}
             
-            {!isAnalyzing && (
+            {!isAnalyzing && !selectedFile && (
               <input
                 type="file"
                 accept=".pdf,.docx,.txt"
