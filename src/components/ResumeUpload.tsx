@@ -49,7 +49,17 @@ const ResumeUpload = ({ onUpload, isAnalyzing = false }: ResumeUploadProps) => {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      const validation = validateResumeFile(file);
+      if (validation.valid) {
+        setSelectedFile(file);
+      } else {
+        toast({
+          title: "Invalid file",
+          description: validation.error,
+          variant: "destructive"
+        });
+      }
     }
   };
 
