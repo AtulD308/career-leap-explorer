@@ -1,8 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 
-// Configure PDF.js to work without worker for better compatibility
-pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+// Configure PDF.js worker with a working fallback
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 export interface ExtractedResumeData {
   text: string;
