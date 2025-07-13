@@ -1,8 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 
-// Configure PDF.js worker - use jsDelivr CDN which is more reliable
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+// Configure PDF.js to work without worker for better compatibility
+pdfjsLib.GlobalWorkerOptions.workerSrc = '';
 
 export interface ExtractedResumeData {
   text: string;
