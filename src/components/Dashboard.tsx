@@ -30,7 +30,6 @@ const Dashboard = ({ onBack }: DashboardProps) => {
       // Simulate AI processing time
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Analyze the resume using our scoring system
       const analysis = analyzeResume(extractedData.text);
       
       setAnalysisData(analysis);
@@ -41,11 +40,11 @@ const Dashboard = ({ onBack }: DashboardProps) => {
         description: `Score: ${analysis.overallScore}/100 - ${analysis.feedback.length} recommendations generated`,
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error analyzing resume:', error);
       toast({
         title: "Analysis failed",
-        description: "There was an error analyzing your resume. Please try again.",
+        description: error?.message || "There was an error analyzing your resume. Please try again.",
         variant: "destructive"
       });
     } finally {
