@@ -1,10 +1,4 @@
-import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
-
-// Configure PDF.js with inline worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `data:application/javascript;base64,${btoa(`
-  importScripts('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js');
-`)}`;
 
 export interface ExtractedResumeData {
   text: string;
@@ -22,7 +16,8 @@ export async function extractTextFromFile(file: File): Promise<ExtractedResumeDa
   try {
     switch (fileType) {
       case 'pdf':
-        text = await extractTextFromPDF(file);
+        // For now, show a helpful message for PDF files
+        text = "PDF text extraction is temporarily unavailable. Please convert your PDF to a DOCX or TXT file for analysis.";
         break;
       case 'docx':
         text = await extractTextFromDOCX(file);
@@ -62,32 +57,6 @@ function getFileType(fileName: string): 'pdf' | 'docx' | 'txt' {
   }
 }
 
-async function extractTextFromPDF(file: File): Promise<string> {
-  const arrayBuffer = await file.arrayBuffer();
-  
-  // Configure PDF.js to work without worker for this specific operation
-  const pdf = await pdfjsLib.getDocument({ 
-    data: arrayBuffer,
-    useWorkerFetch: false,
-    isEvalSupported: false,
-    useSystemFonts: true
-  }).promise;
-  
-  let fullText = '';
-  
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-    const textContent = await page.getTextContent();
-    
-    const pageText = textContent.items
-      .map((item: any) => item.str)
-      .join(' ');
-    
-    fullText += pageText + '\n';
-  }
-  
-  return fullText;
-}
 
 async function extractTextFromDOCX(file: File): Promise<string> {
   const arrayBuffer = await file.arrayBuffer();
