@@ -1,8 +1,10 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 
-// Configure PDF.js to work without external worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+// Configure PDF.js with inline worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `data:application/javascript;base64,${btoa(`
+  importScripts('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js');
+`)}`;
 
 export interface ExtractedResumeData {
   text: string;
