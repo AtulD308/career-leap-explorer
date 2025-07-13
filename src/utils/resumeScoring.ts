@@ -215,7 +215,7 @@ export class ResumeScorer {
 
   private findMatchingSkills(skillsList: string[]): string[] {
     return skillsList.filter(skill => 
-      new RegExp(`\\b${skill.toLowerCase()}\\b`, 'i').test(this.extractedText)
+      new RegExp(`\\b${skill.toLowerCase().replace(/[+]/g, '\\+')}\\b`, 'i').test(this.extractedText)
     );
   }
 
