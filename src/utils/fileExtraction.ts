@@ -1,8 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 
-// Configure PDF.js worker with a working fallback
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+// Configure PDF.js to work without external worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = '';
 
 export interface ExtractedResumeData {
   text: string;
@@ -62,7 +62,14 @@ function getFileType(fileName: string): 'pdf' | 'docx' | 'txt' {
 
 async function extractTextFromPDF(file: File): Promise<string> {
   const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  
+  // Configure PDF.js to work without worker for this specific operation
+  const pdf = await pdfjsLib.getDocument({ 
+    data: arrayBuffer,
+    useWorkerFetch: false,
+    isEvalSupported: false,
+    useSystemFonts: true
+  }).promise;
   
   let fullText = '';
   
